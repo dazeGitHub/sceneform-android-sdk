@@ -1,24 +1,17 @@
 package com.google.ar.sceneform.samples.gltf
 
-import android.app.Activity
-import android.app.ActivityManager
-import android.content.Context
 import android.net.Uri
-import android.os.Build
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
-import android.widget.Toast
-import com.google.android.filament.gltfio.Animator
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
+import com.google.ar.sceneform.samples.common.helpers.CameraPermissionHelper
 import com.google.ar.sceneform.samples.utils.ArCheckUtils
 import com.google.ar.sceneform.samples.utils.ToastUtil
 import com.google.ar.sceneform.ux.ArFragment
@@ -36,15 +29,39 @@ class GltfActivity2 : AppCompatActivity() {
     // FutureReturnValueIgnored is not valid
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!checkIsSupportedDeviceOrFinish(this)) {
+
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            CameraPermissionHelper.requestCameraPermission(this)
             return
         }
+
         setContentView(R.layout.activity_gltf2)
         mArFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
-        checkArSupport()
+        renderScene()
     }
 
-    private fun checkArSupport() {
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<String>,
+            results: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions!!, results!!)
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            // Use toast instead of snackbar here since the activity will exit.
+            ToastUtil.showShortToast("Camera permission is needed to run this application")
+            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                CameraPermissionHelper.launchPermissionSettings(this)
+            }
+            finish()
+        }else{
+            setContentView(R.layout.activity_gltf2)
+            mArFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
+            renderScene()
+        }
+    }
+
+    private fun renderScene() {
         val result: Boolean = ArCheckUtils.checkDeviceSupportAr(this)
         if (result) {
             loadScene()
@@ -183,25 +200,5 @@ class GltfActivity2 : AppCompatActivity() {
     companion object {
         private val TAG = GltfActivity::class.java.simpleName
         private const val MIN_OPENGL_VERSION = 3.0
-
-        fun checkIsSupportedDeviceOrFinish(activity: Activity): Boolean {
-            if (Build.VERSION.SDK_INT < VERSION_CODES.N) {
-                Log.e(TAG, "Sceneform requires Android N or later")
-                ToastUtil.showShortToast("Sceneform requires Android N or later")
-                activity.finish()
-                return false
-            }
-            val openGlVersionString = (activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
-                    .deviceConfigurationInfo
-                    .glEsVersion
-            if (openGlVersionString.toDouble() < MIN_OPENGL_VERSION) {
-                Log.e(TAG, "Sceneform requires OpenGL ES 3.0 later")
-                ToastUtil.showShortToast("Sceneform requires OpenGL ES 3.0 or later")
-                activity.finish()
-                return false
-            }
-            return true
-        }
     }
-
 }
