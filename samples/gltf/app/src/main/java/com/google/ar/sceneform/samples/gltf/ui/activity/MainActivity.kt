@@ -1,8 +1,8 @@
-package com.google.ar.sceneform.samples.gltf
+package com.google.ar.sceneform.samples.gltf.ui.activity
 
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import com.google.ar.core.HitResult
@@ -11,15 +11,16 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
-import com.google.ar.sceneform.samples.common.helpers.CameraPermissionHelper
-import com.google.ar.sceneform.samples.utils.ArCheckUtils
-import com.google.ar.sceneform.samples.utils.ToastUtil
+import com.google.ar.sceneform.samples.gltf.R
+import com.google.ar.sceneform.samples.gltf.common.helpers.CameraPermissionHelper
+import com.google.ar.sceneform.samples.gltf.common.utils.ArCheckUtils
+import com.google.ar.sceneform.samples.gltf.common.utils.ToastUtil
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_gltf2.*
 import java.lang.ref.WeakReference
 
-class GltfActivity2 : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     private var mArFragment: ArFragment? = null
     private var mRenderable: Renderable? = null
@@ -84,8 +85,12 @@ class GltfActivity2 : AppCompatActivity() {
             alterPlane()
         }
 
-        btn_add_node.setOnClickListener {
+        btn_add_node_gltf.setOnClickListener {
             addTigerNode()
+        }
+
+        btn_add_node.setOnClickListener{
+
         }
 
         btn_add_light.setOnClickListener {

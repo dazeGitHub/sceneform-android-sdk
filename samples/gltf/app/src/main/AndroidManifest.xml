@@ -22,7 +22,7 @@
              the app. For an "AR Optional" app, specify "optional" instead of "required".
         -->
         <activity
-            android:name=".GltfActivity2"
+            android:name="com.google.ar.sceneform.samples.gltf.ui.activity.MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:label="@string/app_name"

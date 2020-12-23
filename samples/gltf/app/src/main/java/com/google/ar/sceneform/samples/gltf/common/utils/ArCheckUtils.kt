@@ -1,4 +1,4 @@
-package com.google.ar.sceneform.samples.utils
+package com.google.ar.sceneform.samples.gltf.common.utils
 
 import android.app.Activity
 import android.app.ActivityManager
@@ -8,7 +8,6 @@ import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Session
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 
 /**

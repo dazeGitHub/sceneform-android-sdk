@@ -1,4 +1,4 @@
-package com.google.ar.sceneform.samples.utils;
+package com.google.ar.sceneform.samples.gltf.common.utils;
 
 import com.hjq.toast.ToastUtils;
 
