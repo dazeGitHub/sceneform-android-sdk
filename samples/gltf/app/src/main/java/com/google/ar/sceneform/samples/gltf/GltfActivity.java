@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
+
 import com.google.android.filament.gltfio.Animator;
 import com.google.android.filament.gltfio.FilamentAsset;
 import com.google.ar.core.Anchor;
@@ -45,6 +46,7 @@ import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
@@ -54,169 +56,174 @@ import java.util.Set;
  * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
  */
 public class GltfActivity extends AppCompatActivity {
-  private static final String TAG = GltfActivity.class.getSimpleName();
-  private static final double MIN_OPENGL_VERSION = 3.0;
+    private static final String TAG = GltfActivity.class.getSimpleName();
+    private static final double MIN_OPENGL_VERSION = 3.0;
 
-  private ArFragment arFragment;
-  private Renderable renderable;
+    private ArFragment arFragment;
+    private Renderable renderable;
 
-  private static class AnimationInstance {
-    Animator animator;
-    Long startTime;
-    float duration;
-    int index;
+    private static class AnimationInstance {
+        Animator animator;
+        Long startTime;
+        float duration;
+        int index;
 
-    AnimationInstance(Animator animator, int index, Long startTime) {
-      this.animator = animator;
-      this.startTime = startTime;
-      this.duration = animator.getAnimationDuration(index);
-      this.index = index;
-    }
-  }
-
-  private final Set<AnimationInstance> animators = new ArraySet<>();
-
-  private final List<Color> colors =
-      Arrays.asList(
-          new Color(0, 0, 0, 1),
-          new Color(1, 0, 0, 1),
-          new Color(0, 1, 0, 1),
-          new Color(0, 0, 1, 1),
-          new Color(1, 1, 0, 1),
-          new Color(0, 1, 1, 1),
-          new Color(1, 0, 1, 1),
-          new Color(1, 1, 1, 1));
-  private int nextColor = 0;
-
-  @Override
-  @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
-  // CompletableFuture requires api level 24
-  // FutureReturnValueIgnored is not valid
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    if (!checkIsSupportedDeviceOrFinish(this)) {
-      return;
+        AnimationInstance(Animator animator, int index, Long startTime) {
+            this.animator = animator;
+            this.startTime = startTime;
+            this.duration = animator.getAnimationDuration(index);
+            this.index = index;
+        }
     }
 
-    setContentView(R.layout.activity_ux);
-    arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+    private final Set<AnimationInstance> animators = new ArraySet<>();
 
-    WeakReference<GltfActivity> weakActivity = new WeakReference<>(this);
+    private final List<Color> colors =
+            Arrays.asList(
+                    new Color(0, 0, 0, 1),
+                    new Color(1, 0, 0, 1),
+                    new Color(0, 1, 0, 1),
+                    new Color(0, 0, 1, 1),
+                    new Color(1, 1, 0, 1),
+                    new Color(0, 1, 1, 1),
+                    new Color(1, 0, 1, 1),
+                    new Color(1, 1, 1, 1));
+    private int nextColor = 0;
 
-    ModelRenderable.builder()
-        .setSource(
-            this,
-            Uri.parse(
-                "https://storage.googleapis.com/ar-answers-in-search-models/static/Tiger/model.glb"))
-        .setIsFilamentGltf(true)
-        .build()
-        .thenAccept(
-            modelRenderable -> {
-              GltfActivity activity = weakActivity.get();
-              if (activity != null) {
-                activity.renderable = modelRenderable;
-              }
-            })
-        .exceptionally(
-            throwable -> {
-              Toast toast =
-                  Toast.makeText(this, "Unable to load Tiger renderable", Toast.LENGTH_LONG);
-              toast.setGravity(Gravity.CENTER, 0, 0);
-              toast.show();
-              return null;
-            });
+    @Override
+    @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
+    // CompletableFuture requires api level 24
+    // FutureReturnValueIgnored is not valid
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    arFragment.setOnTapArPlaneListener(
-        (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-          if (renderable == null) {
+        if (!checkIsSupportedDeviceOrFinish(this)) {
             return;
-          }
+        }
 
-          // Create the Anchor.
-          Anchor anchor = hitResult.createAnchor();
-          AnchorNode anchorNode = new AnchorNode(anchor);
-          anchorNode.setParent(arFragment.getArSceneView().getScene());
+        setContentView(R.layout.activity_ux);
+        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
-          // Create the transformable model and add it to the anchor.
-          TransformableNode model = new TransformableNode(arFragment.getTransformationSystem());
-          model.setParent(anchorNode);
-          model.setRenderable(renderable);
-          model.select();
+        WeakReference<GltfActivity> weakActivity = new WeakReference<>(this);
 
-          FilamentAsset filamentAsset = model.getRenderableInstance().getFilamentAsset();
-          if (filamentAsset.getAnimator().getAnimationCount() > 0) {
-            animators.add(new AnimationInstance(filamentAsset.getAnimator(), 0, System.nanoTime()));
-          }
+        //glb 文件在线查看: https://techbrood.com/tool?p=gltf-viewer，根据如下的 glb 链接下载 glb 文件后上传到该网站查看
+        ModelRenderable.builder()
+                .setSource(
+                        this,
+                        Uri.parse(
+                                "https://storage.googleapis.com/ar-answers-in-search-models/static/Tiger/model.glb"))
+                .setIsFilamentGltf(true)
+                .build()
+                .thenAccept(
+                        modelRenderable -> {
+                            GltfActivity activity = weakActivity.get();
+                            if (activity != null) {
+                                activity.renderable = modelRenderable;
+                            }
+                        })
+                .exceptionally(
+                        throwable -> {
+                            Toast toast =
+                                    Toast.makeText(this, "Unable to load Tiger renderable", Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();
+                            return null;
+                        });
 
-          Color color = colors.get(nextColor);
-          nextColor++;
-          for (int i = 0; i < renderable.getSubmeshCount(); ++i) {
-            Material material = renderable.getMaterial(i);
-            material.setFloat4("baseColorFactor", color);
-          }
+        arFragment.setOnTapArPlaneListener(
+                (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
+                    if (renderable == null) {
+                        return;
+                    }
 
-          Node tigerTitleNode = new Node();
-          tigerTitleNode.setParent(model);
-          tigerTitleNode.setEnabled(false);
-          tigerTitleNode.setLocalPosition(new Vector3(0.0f, 1.0f, 0.0f));
-          ViewRenderable.builder()
-                  .setView(this, R.layout.tiger_card_view)
-                  .build()
-                  .thenAccept(
-                          (renderable) -> {
-                              tigerTitleNode.setRenderable(renderable);
-                              tigerTitleNode.setEnabled(true);
-                          })
-                  .exceptionally(
-                          (throwable) -> {
-                              throw new AssertionError("Could not load card view.", throwable);
-                          }
-                  );
-        });
+                    //父子关系: child -> Parent
+                    // tigerTitleNode -> TransformableNode 的 model -> anchorNode -> arFragment.getArSceneView().getScene()
+                    // Create the Anchor.
+                    Anchor anchor = hitResult.createAnchor();
+                    AnchorNode anchorNode = new AnchorNode(anchor);
+                    anchorNode.setParent(arFragment.getArSceneView().getScene());
 
-    arFragment
-        .getArSceneView()
-        .getScene()
-        .addOnUpdateListener(
-            frameTime -> {
-              Long time = System.nanoTime();
-              for (AnimationInstance animator : animators) {
-                animator.animator.applyAnimation(
-                    animator.index,
-                    (float) ((time - animator.startTime) / (double) SECONDS.toNanos(1))
-                        % animator.duration);
-                animator.animator.updateBoneMatrices();
-              }
-            });
-  }
+                    // Create the transformable model and add it to the anchor.
+                    TransformableNode model = new TransformableNode(arFragment.getTransformationSystem());
+                    model.setParent(anchorNode);
+                    model.setRenderable(renderable);
+                    model.select();
 
-  /**
-   * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
-   * on this device.
-   *
-   * <p>Sceneform requires Android N on the device as well as OpenGL 3.0 capabilities.
-   *
-   * <p>Finishes the activity if Sceneform can not run
-   */
-  public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
-    if (Build.VERSION.SDK_INT < VERSION_CODES.N) {
-      Log.e(TAG, "Sceneform requires Android N or later");
-      Toast.makeText(activity, "Sceneform requires Android N or later", Toast.LENGTH_LONG).show();
-      activity.finish();
-      return false;
+                    FilamentAsset filamentAsset = model.getRenderableInstance().getFilamentAsset();
+                    if (filamentAsset.getAnimator().getAnimationCount() > 0) {
+                        animators.add(new AnimationInstance(filamentAsset.getAnimator(), 0, System.nanoTime()));
+                    }
+
+                    Color color = colors.get(nextColor);
+                    nextColor++;
+                    for (int i = 0; i < renderable.getSubmeshCount(); ++i) {
+                        Material material = renderable.getMaterial(i);
+                        material.setFloat4("baseColorFactor", color);
+                    }
+
+                    Node tigerTitleNode = new Node();
+                    tigerTitleNode.setParent(model);
+                    tigerTitleNode.setEnabled(false);
+                    tigerTitleNode.setLocalPosition(new Vector3(0.0f, 1.0f, 0.0f));
+
+                    //创建可渲染对象，根据布局文件构建 ViewRenderable
+                    ViewRenderable.builder()
+                            .setView(this, R.layout.tiger_card_view)
+                            .build()
+                            .thenAccept(
+                                    (renderable) -> {
+                                        tigerTitleNode.setRenderable(renderable);
+                                        tigerTitleNode.setEnabled(true);
+                                    })
+                            .exceptionally(
+                                    (throwable) -> {
+                                        throw new AssertionError("Could not load card view.", throwable);
+                                    }
+                            );
+                });
+
+        arFragment
+                .getArSceneView()
+                .getScene()
+                .addOnUpdateListener(
+                        frameTime -> {
+                            Long time = System.nanoTime();
+                            for (AnimationInstance animator : animators) {
+                                animator.animator.applyAnimation(
+                                        animator.index,
+                                        (float) ((time - animator.startTime) / (double) SECONDS.toNanos(1))
+                                                % animator.duration);
+                                animator.animator.updateBoneMatrices();
+                            }
+                        });
     }
-    String openGlVersionString =
-        ((ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE))
-            .getDeviceConfigurationInfo()
-            .getGlEsVersion();
-    if (Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-      Log.e(TAG, "Sceneform requires OpenGL ES 3.0 later");
-      Toast.makeText(activity, "Sceneform requires OpenGL ES 3.0 or later", Toast.LENGTH_LONG)
-          .show();
-      activity.finish();
-      return false;
+
+    /**
+     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
+     * on this device.
+     *
+     * <p>Sceneform requires Android N on the device as well as OpenGL 3.0 capabilities.
+     *
+     * <p>Finishes the activity if Sceneform can not run
+     */
+    public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
+        if (Build.VERSION.SDK_INT < VERSION_CODES.N) {
+            Log.e(TAG, "Sceneform requires Android N or later");
+            Toast.makeText(activity, "Sceneform requires Android N or later", Toast.LENGTH_LONG).show();
+            activity.finish();
+            return false;
+        }
+        String openGlVersionString =
+                ((ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE))
+                        .getDeviceConfigurationInfo()
+                        .getGlEsVersion();
+        if (Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
+            Log.e(TAG, "Sceneform requires OpenGL ES 3.0 later");
+            Toast.makeText(activity, "Sceneform requires OpenGL ES 3.0 or later", Toast.LENGTH_LONG)
+                    .show();
+            activity.finish();
+            return false;
+        }
+        return true;
     }
-    return true;
-  }
 }

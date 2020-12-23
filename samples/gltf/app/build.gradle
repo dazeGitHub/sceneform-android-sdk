@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.ar.sceneform.plugin'
+
+//sceneform.asset('sampledata/models/andy.obj', // 'Source Asset Path' specified during import.
+//        'default',                            // 'Material Path' specified during import.
+//        'sampledata/models/andy.sfa',         // '.sfa Output Path' specified during import.
+//        'src/main/res/raw/andy')              // '.sfb Output Path' specified during import.
 
 android {
     compileSdkVersion 28
@@ -44,4 +53,8 @@ dependencies {
     api project(":sceneformux")
 
     implementation "com.android.support:appcompat-v7:28.0.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+
+    api 'com.hjq:toast:8.6'
 }
